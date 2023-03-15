@@ -5,7 +5,7 @@ const props = defineProps(["student"]);
 const emit = defineEmits(["deletedStudent"]);
 
 const show = ref(false);
-const errors = [];
+var errors = [];
 
 function deletedStudent() {
   emit("deletedStudent");

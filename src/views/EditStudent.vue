@@ -37,10 +37,8 @@ const errors = reactive({
 });
 
 onMounted(() => {
-  console.log("props.id:", props.id);
   StudentServices.getStudent(props.id)
     .then((response) => {
-      console.log("response.data:", response.data);
       Object.assign(student, response.data[0]);
     })
     .catch((error) => {
