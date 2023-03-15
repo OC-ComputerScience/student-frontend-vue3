@@ -1,3 +1,73 @@
+<script setup>
+import StudentServices from "../services/StudentServices.js";
+import { reactive, ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
+
+const router = useRouter();
+const route = useRoute();
+
+const student = reactive({
+  idNumber: "",
+  firstName: "",
+  lastName: "",
+  city: "",
+  state: "",
+  zip: "",
+  email: "",
+  classification: "",
+  gender: "",
+});
+const errors = reactive({
+  idNumber: "",
+  firstName: "",
+  lastName: "",
+  city: "",
+  state: "",
+  zip: "",
+  email: "",
+  classification: "",
+  gender: "",
+});
+
+function addStudent() {
+  StudentServices.addStudent(student)
+    .then(() => {
+      router.push({ name: "list" });
+    })
+    .catch((error) => {
+      if (error.response.status == "406") {
+        for (let obj of error.response.data) {
+          if (obj.attributeName === undefined) {
+            obj.attributeName = "idNumber";
+          }
+          errors[obj.attributeName] = obj.message;
+        }
+      } else {
+        if (error.response.data.attributeName === undefined) {
+          error.response.data.attributeName = "idNumber";
+        }
+        errors[error.response.data.attributeName] =
+          error.response.data.error.sqlMessage;
+      }
+    });
+}
+function cancel() {
+  router.push({ name: "list" });
+}
+function cityStateLookup() {
+  if (student.zip != "") {
+    StudentServices.getZipInfo(student.zip)
+      .then((response) => {
+        student.city = response.data.city;
+        student.state = response.data.state_code;
+      })
+      .catch((error) => {
+        console.log("There was an error:", error.response);
+      });
+  }
+}
+</script>
+
 <template>
   <div id="body">
     <h1>Student Add</h1>
@@ -110,58 +180,3 @@
     <button name="Cancel" v-on:click.prevent="cancel()">Cancel</button>
   </div>
 </template>
-
-<script>
-import axios from "axios";
-export default {
-  data() {
-    return {
-      student: {},
-      errors: {},
-    };
-  },
-  methods: {
-    addStudent() {
-      axios
-        .post("http://localhost/api/students/", this.student)
-        .then(() => {
-          this.$router.push({ name: "list" });
-        })
-        .catch((error) => {
-          if (error.response.status == "406") {
-            for (let obj of error.response.data) {
-              if (obj.attributeName === undefined) {
-                obj.attributeName = "idNumber";
-              }
-              this.errors[obj.attributeName] = obj.message;
-            }
-          } else {
-            if (error.response.data.attributeName === undefined) {
-              error.response.data.attributeName = "idNumber";
-            }
-            this.errors[error.response.data.attributeName] =
-              error.response.data.error.sqlMessage;
-          }
-        });
-    },
-    cancel() {
-      this.$router.push({ name: "list" });
-    },
-    cityStateLookup() {
-      if (this.student.zip != "") {
-        axios
-          .get("http://localhost/api/zip/" + this.student.zip, {
-            crossOrigin: true,
-          })
-          .then((response) => {
-            this.student.city = response.data.city;
-            this.student.state = response.data.state_code;
-          })
-          .catch((error) => {
-            console.log("There was an error:", error.response);
-          });
-      }
-    },
-  },
-};
-</script>
