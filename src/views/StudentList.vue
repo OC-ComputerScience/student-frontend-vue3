@@ -1,7 +1,33 @@
+<script setup>
+import StudentDisplay from "../components/StudentDisplay.vue";
+import StudentServices from "../services/StudentServices.js";
+import { ref, onMounted } from "vue";
+
+const students = ref(null);
+const message = ref("");
+
+onMounted(() => {
+  getStudents();
+});
+
+function getStudents() {
+  StudentServices.getStudents()
+    .then((response) => {
+      students.value = response.data;
+      message.value = "";
+    })
+    .catch((error) => {
+      message.value = "Error: " + error.code + ":" + error.message;
+      console.log(error);
+    });
+}
+</script>
+
 <template>
   <div id="body">
     <h1>Student List</h1>
     <br />
+    <h2>{{ message }}</h2>
     <div class="grid-container">
       <StudentDisplay
         v-for="student in students"
@@ -12,35 +38,5 @@
     </div>
   </div>
 </template>
-
-<script>
-import StudentDisplay from "../components/StudentDisplay.vue";
-import axios from "axios";
-export default {
-  components: {
-    StudentDisplay,
-  },
-  data() {
-    return {
-      students: [],
-    };
-  },
-  created() {
-    this.getStudents();
-  },
-  methods: {
-    getStudents() {
-      axios
-        .get("http://localhost/api/students", { crossOrigin: true })
-        .then((response) => {
-          this.students = response.data;
-        })
-        .catch((error) => {
-          console.log("There was an error:", error.response);
-        });
-    },
-  },
-};
-</script>
 
 <style></style>
