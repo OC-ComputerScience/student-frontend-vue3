@@ -5,6 +5,7 @@ import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
+const message = ref("");
 
 const student = reactive({
   idNumber: "",
@@ -35,7 +36,7 @@ function addStudent() {
       router.push({ name: "list" });
     })
     .catch((error) => {
-      if (error.response.status == "406") {
+      if (error.response != null && error.response.status == "406") {
         for (let obj of error.response.data) {
           if (obj.attributeName === undefined) {
             obj.attributeName = "idNumber";
@@ -43,11 +44,9 @@ function addStudent() {
           errors[obj.attributeName] = obj.message;
         }
       } else {
-        if (error.response.data.attributeName === undefined) {
-          error.response.data.attributeName = "idNumber";
-        }
-        errors[error.response.data.attributeName] =
-          error.response.data.error.sqlMessage;
+        message.value = "Error: " + error.code + ":" + error.message;
+        console.log(error);
+        console.log(error);
       }
     });
 }
@@ -62,7 +61,8 @@ function cityStateLookup() {
         student.state = response.data.state_code;
       })
       .catch((error) => {
-        console.log("There was an error:", error.response);
+        message.value = "Error: " + error.code + ":" + error.message;
+        console.log(error);
       });
   }
 }
@@ -71,6 +71,7 @@ function cityStateLookup() {
 <template>
   <div id="body">
     <h1>Student Add</h1>
+    <h2>{{ message }}</h2>
     <h4>{{ student.firstName }} {{ student.lastName }}</h4>
     <br />
     <div class="form">

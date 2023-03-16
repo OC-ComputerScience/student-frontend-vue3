@@ -5,7 +5,7 @@ const props = defineProps(["student"]);
 const emit = defineEmits(["deletedStudent"]);
 
 const show = ref(false);
-var errors = [];
+const deleteError = ref(false);
 
 function deletedStudent() {
   emit("deletedStudent");
@@ -14,12 +14,13 @@ function deletedStudent() {
 function deleteStudent(id) {
   StudentServices.deleteStudent(id)
     .then((response) => {
-      errors.value = response.data;
       show.value = false;
+      deleteError.value = false;
       deletedStudent();
     })
     .catch((error) => {
-      errors = error.data;
+      console.log(error);
+      deleteError.value = true;
     });
 }
 </script>
@@ -45,16 +46,35 @@ function deleteStudent(id) {
     <div class="modal-content">
       <div class="modal-header">
         <span @click="show = false" class="close">&times;</span>
-        <p>
-          Are you sure you want to delete {{ props.student.firstName }}
-          {{ props.student.lastName }}?
+        <p v-if="!deleteError">
+          Are you sure you want to delete <br />
+          {{ props.student.firstName }} {{ props.student.lastName }}?
+        </p>
+        <p v-if="deleteError">
+          Error deleting<br />{{ props.student.firstName }}
+          {{ props.student.lastName }}.
         </p>
       </div>
       <br />
       <div class="modal-body">
-        <button v-on:click="show = false">No, cancel</button>
-        <button class="error" v-on:click="deleteStudent(props.student.id)">
+        <button v-if="!deleteError" v-on:click="show = false">
+          No, cancel
+        </button>
+        <button
+          v-if="!deleteError"
+          class="error"
+          v-on:click="deleteStudent(props.student.id)"
+        >
           Yes, delete
+        </button>
+        <button
+          v-if="deleteError"
+          v-on:click="
+            deleteError = false;
+            show = false;
+          "
+        >
+          Close
         </button>
       </div>
     </div>

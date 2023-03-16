@@ -6,6 +6,7 @@ import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
+const message = ref("");
 
 const props = defineProps({
   id: {
@@ -40,9 +41,11 @@ onMounted(() => {
   StudentServices.getStudent(props.id)
     .then((response) => {
       Object.assign(student, response.data[0]);
+      message.value = "";
     })
     .catch((error) => {
-      console.log("There was an error:", error.message);
+      message.value = "Error: " + error.code + ":" + error.message;
+      console.log(error);
     });
 });
 function updateStudent() {
@@ -56,11 +59,8 @@ function updateStudent() {
           errors[obj.attributeName] = obj.message;
         }
       } else {
-        if (error.response.data.attributeName === undefined) {
-          error.response.data.attributeName = "idNumber";
-        }
-        this.errors[error.response.data.attributeName] =
-          error.response.data.error.sqlMessage;
+        message.value = "Error: " + error.code + ":" + error.message;
+        console.log(error);
       }
     });
 }
@@ -73,9 +73,11 @@ function cityStateLookup() {
       .then((response) => {
         student.city = response.data.city;
         student.state = response.data.state_code;
+        message.value = "";
       })
       .catch((error) => {
-        console.log("There was an error:", error.response);
+        message.value = "Error: " + error.code + ":" + error.message;
+        console.log(error);
       });
   }
 }
@@ -84,6 +86,7 @@ function cityStateLookup() {
 <template>
   <div id="body">
     <h1>Student Edit</h1>
+    <h2>{{ message }}</h2>
     <h4>{{ student.firstName }} {{ student.lastName }}</h4>
     <br />
     <div class="form">

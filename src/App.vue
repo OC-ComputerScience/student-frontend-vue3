@@ -1,7 +1,8 @@
 <script setup>
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 import ocLogo from "/oc-logo-white.png";
+
+const logoURL = ocLogo;
+const title = "Student Listing";
 </script>
 
 <template>
@@ -32,23 +33,6 @@ import ocLogo from "/oc-logo-white.png";
         </div>
       </ul>
     </nav>
-    <router-view :key="$route.fullPath" />
+    <router-view />
   </div>
 </template>
-
-<script>
-export default {
-  components: {
-    ocLogo,
-  },
-  data() {
-    return {
-      title: "Student Listing",
-      logoURL: "",
-    };
-  },
-  created() {
-    this.logoURL = ocLogo;
-  },
-};
-</script>
