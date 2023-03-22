@@ -1,6 +1,7 @@
 <script setup>
-import StudentDisplay from "../components/StudentDisplay.vue";
 import StudentServices from "../services/StudentServices.js";
+import StudentDisplay from "../components/StudentDisplay.vue";
+
 import { ref, onMounted } from "vue";
 
 const students = ref(null);

@@ -1,37 +1,16 @@
 <script setup>
 import StudentServices from "../services/StudentServices.js";
-import { reactive, ref } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
-const route = useRoute();
 const message = ref("");
 
-const student = reactive({
-  idNumber: "",
-  firstName: "",
-  lastName: "",
-  city: "",
-  state: "",
-  zip: "",
-  email: "",
-  classification: "",
-  gender: "",
-});
-const errors = reactive({
-  idNumber: "",
-  firstName: "",
-  lastName: "",
-  city: "",
-  state: "",
-  zip: "",
-  email: "",
-  classification: "",
-  gender: "",
-});
+const student = ref({});
+const errors = ref({});
 
 function addStudent() {
-  StudentServices.addStudent(student)
+  StudentServices.addStudent(student.value)
     .then(() => {
       router.push({ name: "list" });
     })
@@ -41,7 +20,7 @@ function addStudent() {
           if (obj.attributeName === undefined) {
             obj.attributeName = "idNumber";
           }
-          errors[obj.attributeName] = obj.message;
+          errors.value[obj.attributeName] = obj.message;
         }
       } else {
         message.value = "Error: " + error.code + ":" + error.message;
@@ -54,11 +33,11 @@ function cancel() {
   router.push({ name: "list" });
 }
 function cityStateLookup() {
-  if (student.zip != "") {
-    StudentServices.getZipInfo(student.zip)
+  if (student.value.zip != "") {
+    StudentServices.getZipInfo(student.value.zip)
       .then((response) => {
-        student.city = response.data.city;
-        student.state = response.data.state_code;
+        student.value.city = response.data.city;
+        student.value.state = response.data.state_code;
       })
       .catch((error) => {
         message.value = "Error: " + error.code + ":" + error.message;
