@@ -1,11 +1,9 @@
 <script setup>
 import StudentServices from "../services/StudentServices.js";
-import { reactive, ref, onMounted } from "vue";
-
-import { useRouter, useRoute } from "vue-router";
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
-const route = useRoute();
 const message = ref("");
 
 const props = defineProps({
@@ -14,33 +12,13 @@ const props = defineProps({
   },
 });
 
-var student = reactive({
-  idNumber: "",
-  firstName: "",
-  lastName: "",
-  city: "",
-  state: "",
-  zip: "",
-  email: "",
-  classification: "",
-  gender: "",
-});
-const errors = reactive({
-  idNumber: "",
-  firstName: "",
-  lastName: "",
-  city: "",
-  state: "",
-  zip: "",
-  email: "",
-  classification: "",
-  gender: "",
-});
+const student = ref({});
+const errors = ref({});
 
 onMounted(() => {
   StudentServices.getStudent(props.id)
     .then((response) => {
-      Object.assign(student, response.data[0]);
+      student.value = response.data[0];
       message.value = "";
     })
     .catch((error) => {
@@ -49,14 +27,14 @@ onMounted(() => {
     });
 });
 function updateStudent() {
-  StudentServices.updateStudent(student)
+  StudentServices.updateStudent(student.value)
     .then(() => {
       router.push({ name: "list" });
     })
     .catch((error) => {
       if (error.response.status == "406") {
         for (let obj of error.response.data) {
-          errors[obj.attributeName] = obj.message;
+          errors.value[obj.attributeName] = obj.message;
         }
       } else {
         message.value = "Error: " + error.code + ":" + error.message;
@@ -68,11 +46,11 @@ function cancel() {
   router.push({ name: "list" });
 }
 function cityStateLookup() {
-  if (student.zip != "") {
-    StudentServices.getZipInfo(student.zip)
+  if (student.value.zip != "") {
+    StudentServices.getZipInfo(student.value.zip)
       .then((response) => {
-        student.city = response.data.city;
-        student.state = response.data.state_code;
+        student.value.city = response.data.city;
+        student.value.state = response.data.state_code;
         message.value = "";
       })
       .catch((error) => {
